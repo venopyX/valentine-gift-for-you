@@ -1,0 +1,20 @@
+### **Suggested Tech Stack**
+
+Recommendations:
+- **Frontend Framework:** Vue 3(JS) with Vuetify.
+- **Backend:** NONE
+- **UI Library:** Tailwind V4 with custom CSS
+- **State Management:** Pinia (Vue’s modern state management library).
+
+RULES TO FOLLOW:
+  - Always make sure everything is maintainable, readable, and scalable.
+  - DRY (Don't Repeat Yourself), KISS (Keep It Simple Stupid), and YAGNI (You aren't gonna need it).
+  - Read fully upto 200 each file when you read file for analysis(understand the concept fully)
+
+TAILWIND V4 UPDATE APPROACH:
+  - Tailwind V4 setup is correct and follows upated approach, therefore don't touch that!
+  - Tailwind v4 is now CSS based approach, and all js related files are deleted and now it relies on lightning CSS no tailwind.config.js at all.
+  - Donot use `@apply` directive, instead use utility classes directly in your CSS. (NEVER USE @apply)
+
+**Vue 3 compatibility issues:**
+- Setup Doesn't need explicit `export default`, Leads to <script setup> cannot contain ES module exports. If you are using a previous version of <script setup>

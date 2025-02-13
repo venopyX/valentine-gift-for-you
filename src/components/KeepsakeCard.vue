@@ -1,0 +1,254 @@
+<template>
+  <div :style="{
+    minHeight: '100vh',
+    padding: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, rgb(252, 231, 243) 0%, rgb(255, 255, 255) 100%)'
+  }">
+    <!-- Keepsake Card -->
+    <div ref="cardRef" :style="{
+      maxWidth: '42rem',
+      width: '100%',
+      background: 'linear-gradient(135deg, rgb(255, 245, 247) 0%, rgb(255, 255, 255) 100%)',
+      borderRadius: '0.75rem',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      padding: '2rem',
+      marginBottom: '2rem',
+      position: 'relative',
+      border: '1px solid rgba(248, 180, 217, 0.2)'
+    }">
+      <div :style="{ textAlign: 'center', marginBottom: '2rem' }">
+        <h1 :style="{
+          fontSize: '2.25rem',
+          fontFamily: 'Great Vibes, cursive',
+          color: 'rgb(219, 39, 119)',
+          marginBottom: '1rem'
+        }">Happy Valentine's Day</h1>
+        <h2 :style="{
+          fontSize: '1.5rem',
+          fontFamily: 'Great Vibes, cursive',
+          color: 'rgb(236, 72, 153)'
+        }">{{ name }}</h2>
+      </div>
+
+      <!-- Love Poem -->
+      <div :style="{ marginBottom: '2rem', textAlign: 'center' }">
+        <p :style="{
+          fontSize: '1.125rem',
+          fontFamily: 'Roboto, sans-serif',
+          color: 'rgb(55, 65, 81)',
+          lineHeight: '1.75',
+          fontStyle: 'italic'
+        }">
+          {{ poem }}
+        </p>
+      </div>
+
+      <!-- Memory Highlights -->
+      <div :style="{ marginBottom: '2rem' }">
+        <h3 :style="{
+          fontSize: '1.25rem',
+          fontFamily: 'Great Vibes, cursive',
+          color: 'rgb(219, 39, 119)',
+          textAlign: 'center',
+          marginBottom: '1rem'
+        }">Our Special Moments</h3>
+        <div :style="{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1rem'
+        }">
+          <div v-for="(memory, index) in displayedMemories" 
+               :key="index"
+               :style="{
+                 padding: '1rem',
+                 background: 'rgb(253, 242, 248)',
+                 borderRadius: '0.5rem'
+               }">
+            <p :style="{
+              color: 'rgb(55, 65, 81)',
+              fontFamily: 'Roboto, sans-serif'
+            }">{{ memory }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signature -->
+      <div :style="{ textAlign: 'right' }">
+        <p :style="{
+          fontFamily: 'Great Vibes, cursive',
+          fontSize: '1.5rem',
+          color: 'rgb(219, 39, 119)'
+        }">With Love,</p>
+        <p :style="{
+          fontFamily: 'Great Vibes, cursive',
+          fontSize: '1.25rem',
+          color: 'rgb(236, 72, 153)'
+        }">Your Valentine</p>
+        <p :style="{
+          fontSize: '0.875rem',
+          color: 'rgb(107, 114, 128)',
+          marginTop: '0.5rem'
+        }">{{ formatDate(date) }}</p>
+      </div>
+
+      <!-- Decorative Elements -->
+      <div :style="{
+        position: 'absolute',
+        top: '1rem',
+        left: '1rem',
+        fontSize: '2.25rem',
+        animation: 'float-slow 3s ease-in-out infinite'
+      }">❤️</div>
+      <div :style="{
+        position: 'absolute',
+        bottom: '1rem',
+        right: '1rem',
+        fontSize: '2.25rem',
+        animation: 'float-slow 3s ease-in-out infinite',
+        animationDelay: '200ms'
+      }">❤️</div>
+    </div>
+
+    <!-- Download Button -->
+    <button @click="downloadCard" 
+            :disabled="isGenerating"
+            :style="{
+              background: isGenerating ? 'rgb(219, 39, 119, 0.5)' : 'rgb(219, 39, 119)',
+              color: 'white',
+              padding: '1rem 2rem',
+              borderRadius: '9999px',
+              transform: isGenerating ? 'none' : 'scale(1)',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+              cursor: isGenerating ? 'not-allowed' : 'pointer'
+            }">
+      <span v-if="!isGenerating">🎁 Save Your Valentine</span>
+      <span v-else class="flex items-center">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Generating Card...
+      </span>
+    </button>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useUserStore } from '../stores/userStore'
+import { generateMessage } from '../services/ai-generator'
+import html2canvas from 'html2canvas'
+
+const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
+const cardRef = ref(null)
+
+const name = computed(() => userStore.name || route.query.name || 'My Love')
+const date = computed(() => userStore.date || route.query.date || '')
+const memories = computed(() => userStore.memories || [])
+
+// Generate a romantic poem using the AI service
+const poem = computed(() => 
+  generateMessage('poem', { 
+    name: name.value, 
+    date: date.value 
+  })
+)
+
+// Select up to 4 memories to display
+const displayedMemories = computed(() => {
+  const defaultMemories = [
+    'Our first magical encounter',
+    'Countless shared laughs',
+    'Adventures big and small',
+    'Moments that took our breath away'
+  ]
+  
+  const userMemories = memories.value
+  if (!userMemories.length) return defaultMemories
+  return [...userMemories, ...defaultMemories].slice(0, 4)
+})
+
+function formatDate(dateString) {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+}
+
+const isGenerating = ref(false)
+
+async function downloadCard() {
+  if (!cardRef.value || isGenerating.value) return
+  
+  isGenerating.value = true
+  
+  try {
+    // Wait a moment for any animations to complete
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    const canvas = await html2canvas(cardRef.value, {
+      scale: 2, // Higher quality
+      useCORS: true, // Enable cross-origin images
+      backgroundColor: '#ffffff', // Ensure white background
+      logging: false,
+      width: cardRef.value.offsetWidth,
+      height: cardRef.value.offsetHeight,
+      windowWidth: cardRef.value.offsetWidth,
+      windowHeight: cardRef.value.offsetHeight
+    })
+
+    // Convert to blob for better handling of large images
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.download = `valentine-for-${name.value.toLowerCase().replace(/\s+/g, '-')}.png`
+      link.href = url
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }, 'image/png', 1.0)
+  } catch (error) {
+    console.error('Error generating card:', error)
+    alert('Sorry, there was an error generating your card. Please try again.')
+  } finally {
+    isGenerating.value = false
+  }
+}
+</script>
+
+<style scoped>
+.keepsake-card {
+  position: relative;
+  background-image: linear-gradient(135deg, #fff5f7 0%, #ffffff 100%);
+  border: 1px solid rgba(248, 180, 217, 0.2);
+}
+
+/* Floating animation for hearts */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.animate-float-slow {
+  animation: float-slow 3s ease-in-out infinite;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+</style>    
