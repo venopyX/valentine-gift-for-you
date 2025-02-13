@@ -7,9 +7,35 @@ import Cookies from 'js-cookie'
 export function parseUrlParams() {
   const params = {}
   const query = new URLSearchParams(window.location.search)
-  for (const [key, value] of query.entries()) {
-    params[key] = value
+  
+  // Parse name
+  const name = query.get('name')
+  if (name) {
+    params.name = decodeURIComponent(name)
   }
+
+  // Parse memories
+  const memories = query.get('memories')
+  if (memories) {
+    try {
+      params.memories = decodeURIComponent(memories)
+        .split('|')
+        .map(memory => {
+          const [text, date] = memory.split('@')
+          return {
+            text: text || '',
+            date: date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : ''
+          }
+        })
+        .filter(memory => memory.text.trim())
+    } catch (e) {
+      console.error('Error parsing memories:', e)
+      params.memories = []
+    }
+  } else {
+    params.memories = []
+  }
+
   return params
 }
 

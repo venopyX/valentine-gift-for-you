@@ -91,7 +91,7 @@ function startCountdown() {
     if (countdown.value <= 0) {
       clearInterval(countdownTimer)
     }
-  }, 1000)
+  }, 3000)
 }
 
 onMounted(() => {

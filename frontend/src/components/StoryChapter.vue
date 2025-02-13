@@ -25,7 +25,7 @@
 
     <!-- Navigation -->
     <div class="mt-8 flex justify-center space-x-4" v-show="isEnvelopeOpened">
-      <button @click="goToMap" 
+      <button @click="goToMap"
               class="px-6 py-3 bg-pink-500 text-white rounded-full hover:bg-pink-600
                      transform hover:scale-105 transition-all duration-300 font-roboto">
         Explore Our Memories
@@ -38,25 +38,40 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
-import { generateMessage } from '../services/ai-generator'
 
 const router = useRouter()
 const route = useRoute()
-const userStore = useUserStore()
+const store = useUserStore()
 
-const name = computed(() => userStore.name || route.query.name || 'My Love')
-const date = computed(() => userStore.date || route.query.date || '')
-const memories = computed(() => userStore.memories || [])
-
+const name = computed(() => store.name || route.query.name || 'My Love')
+const memories = computed(() => store.memories || [])
 const isEnvelopeOpened = ref(false)
 
+// Initialize from URL and generate content
+onMounted(async () => {
+  await store.initFromUrl(true)
+  setTimeout(openEnvelope, 1000)
+})
+
 // Generate personalized story paragraphs
-const storyParagraphs = computed(() => [
-  generateMessage('loveLetter', { name: name.value, date: date.value }),
-  'Every moment with you feels like a beautiful dream come true. Your smile lights up my world in ways that words cannot express.',
-  'As we continue this journey together, I want to share with you some of our most precious memories that have made our story so special.',
-  'Click the button below to revisit those magical moments we have shared together.'
-])
+const storyParagraphs = computed(() => {
+  const generatedContent = store.generatedContent
+  if (generatedContent && generatedContent.story) {
+    return [
+      generatedContent.story,
+      'Every moment with you feels like a beautiful dream come true. Your smile lights up my world in ways that words cannot express.',
+      'As we continue this journey together, I want to share with you some of our most precious memories that have made our story so special.',
+      'Click the button below to revisit those magical moments we have shared together.'
+    ]
+  } else {
+    return [
+      'Dear [Name],',
+      'Every moment with you feels like a beautiful dream come true. Your smile lights up my world in ways that words cannot express.',
+      'As we continue this journey together, I want to share with you some of our most precious memories that have made our story so special.',
+      'Click the button below to revisit those magical moments we have shared together.'
+    ]
+  }
+})
 
 function openEnvelope() {
   if (!isEnvelopeOpened.value) {
@@ -70,11 +85,6 @@ function goToMap() {
     query: route.query
   })
 }
-
-// Auto-open envelope after a short delay
-onMounted(() => {
-  setTimeout(openEnvelope, 1000)
-})
 </script>
 
 <style scoped>
