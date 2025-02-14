@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-pink-100 to-white p-6">
     <div class="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-8">
-      <h1 class="text-3xl font-great-vibes text-pink-600 text-center mb-8">Create Your Valentine</h1>
+      <h1 class="text-3xl font-great-vibes text-pink-600 text-center mb-8">Create Your Valentine Gift</h1>
       
       <form @submit.prevent="generateLink" class="space-y-6">
         <!-- Name Input -->
         <div class="mb-4">
-          <label for="name" class="block text-gray-700 mb-2">Their Name</label>
+          <label for="name" class="block text-gray-700 mb-2">Partner's Name</label>
           <input
             id="name"
             v-model="name"
