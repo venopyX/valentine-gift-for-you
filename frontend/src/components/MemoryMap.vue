@@ -1,62 +1,84 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-pink-100 to-white p-6">
+  <div class="min-h-screen bg-gradient-to-br from-pink-100 to-white relative overflow-hidden">
+    <!-- Floating Hearts Background -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div v-for="n in 20" :key="n" 
+           class="absolute animate-float"
+           :style="`left: ${Math.random() * 100}%; animation-delay: -${Math.random() * 5}s; animation-duration: ${5 + Math.random() * 5}s`">
+        <span class="text-pink-200 text-opacity-30 text-4xl">❤</span>
+      </div>
+    </div>
+
     <!-- Loading State -->
-    <div v-if="isLoading" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+    <div v-if="isLoading" 
+         class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 backdrop-blur-sm">
       <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent mb-4"></div>
-        <p class="text-gray-700 font-roboto">Loading your memories...</p>
-      </div>
-    </div>
-    <!-- Header -->
-    <header class="text-center mb-12" role="banner">
-      <h1 class="text-4xl font-great-vibes text-pink-600 mb-4">Our Memory Collection</h1>
-      <p class="text-lg text-gray-700 font-roboto">Each heart holds a precious moment we've shared</p>
-    </header>
-
-    <!-- Memory Map Grid -->
-    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-         role="grid"
-         aria-label="Memory collection grid">
-      <div v-for="(memory, index) in memories" 
-           :key="index"
-           class="memory-card relative"
-           :class="{ 'revealed': revealedMemories[index] }"
-           @click="revealMemory(index)"
-           @keydown.enter="revealMemory(index)"
-           @keydown.space.prevent="revealMemory(index)"
-           tabindex="0"
-           role="gridcell"
-           :aria-label="`Memory ${index + 1}${revealedMemories[index] ? ': ' + memory.text : ''}`"
-           :aria-expanded="revealedMemories[index]">
-        <!-- Card Front (Heart) -->
-        <div class="card-front"
-             :aria-hidden="revealedMemories[index]">
-          <div class="heart-icon text-6xl">❤️</div>
-          <div class="memory-number font-great-vibes text-2xl text-pink-600">
-            Memory #{{ index + 1 }}
-          </div>
-        </div>
-
-        <!-- Card Back (Memory Content) -->
-        <div class="card-back bg-white p-6 rounded-lg shadow-lg"
-             :aria-hidden="!revealedMemories[index]">
-          <p class="text-gray-700 font-roboto text-lg mb-4">{{ memory.text }}</p>
-          <div class="text-sm text-pink-500">
-            {{ memory.date ? formatDate(memory.date) : 'Date not specified' }}
-          </div>
-        </div>
+        <div class="heart-loader mb-6"></div>
+        <p class="text-gray-700 font-roboto animate-pulse">Loading our precious memories...</p>
       </div>
     </div>
 
-    <!-- Navigation -->
-    <div class="fixed bottom-6 right-6">
-      <button @click="goToKeepsake" 
-              class="bg-pink-500 text-white px-6 py-3 rounded-full hover:bg-pink-600
-                     transform hover:scale-105 transition-all duration-300 shadow-lg
-                     focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
-              aria-label="Create keepsake card">
-        Create Keepsake 🎁
-      </button>
+    <div class="container mx-auto p-6 relative z-10">
+      <!-- Header with Decorative Elements -->
+      <header class="text-center mb-16 relative" role="banner">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-pink-400 to-transparent"></div>
+        <h1 class="text-5xl font-great-vibes text-pink-600 mb-4 animate-fade-in">
+          Our Memory Collection
+        </h1>
+        <p class="text-lg text-gray-700 font-roboto italic">
+          ✨ Each heart holds a precious moment we've shared ✨
+        </p>
+        <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-pink-400 to-transparent"></div>
+      </header>
+
+      <!-- Memory Map Grid -->
+      <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+           role="grid"
+           aria-label="Memory collection grid">
+        <div v-for="(memory, index) in memories" 
+             :key="index"
+             class="memory-card relative group"
+             :class="{ 'revealed': revealedMemories[index] }"
+             @click="revealMemory(index)"
+             @keydown.enter="revealMemory(index)"
+             @keydown.space.prevent="revealMemory(index)"
+             tabindex="0"
+             role="gridcell"
+             :aria-label="`Memory ${index + 1}${revealedMemories[index] ? ': ' + memory.text : ''}`"
+             :aria-expanded="revealedMemories[index]">
+          
+          <!-- Card Front -->
+          <div class="card-front">
+            <div class="glowing-heart">❤️</div>
+            <div class="memory-number font-great-vibes text-2xl text-pink-600 mt-4">
+              Memory #{{ index + 1 }}
+            </div>
+            <div class="absolute bottom-4 text-sm text-pink-400 opacity-75">Click to reveal</div>
+          </div>
+
+          <!-- Card Back -->
+          <div class="card-back">
+            <div class="relative h-full w-full bg-white rounded-2xl p-6 shadow-2xl">
+              <div class="absolute -top-3 -left-3 text-4xl">💝</div>
+              <div class="absolute -bottom-3 -right-3 text-4xl">💖</div>
+              <p class="text-gray-700 font-roboto text-lg mb-4 italic">
+                "{{ memory.text }}"
+              </p>
+              <div class="text-sm text-pink-500 font-semibold">
+                {{ memory.date ? formatDate(memory.date) : 'A timeless moment' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="fixed bottom-8 right-8">
+        <button @click="goToKeepsake" 
+                class="navigation-button">
+          Create Keepsake 🎁
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -176,17 +198,70 @@ function goToKeepsake() {
 </script>
 
 <style scoped>
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+@keyframes glow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(244, 114, 182, 0.5)); }
+  50% { filter: drop-shadow(0 0 20px rgba(244, 114, 182, 0.8)); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out forwards;
+}
+
+/* Heart Loader */
+.heart-loader {
+  width: 50px;
+  height: 50px;
+  position: relative;
+  margin: 0 auto;
+}
+
+.heart-loader::before,
+.heart-loader::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 25px;
+  height: 40px;
+  border-radius: 40px 40px 0 0;
+  background-color: rgb(236, 72, 153);
+  transform: rotate(-45deg);
+  transform-origin: 100% 100%;
+  animation: pulse 1s infinite;
+}
+
+.heart-loader::after {
+  left: 0;
+  transform: rotate(45deg);
+  transform-origin: 0 100%;
+}
+
+/* Memory Cards */
 .memory-card {
   perspective: 1000px;
-  height: 300px;
+  height: 320px;
   cursor: pointer;
   outline: none;
 }
 
 .memory-card:focus {
   outline: 2px solid rgb(236, 72, 153);
-  outline-offset: 2px;
-  border-radius: 0.5rem;
+  outline-offset: 4px;
+  border-radius: 1rem;
 }
 
 .card-front,
@@ -203,9 +278,9 @@ function goToKeepsake() {
 }
 
 .card-front {
-  background-color: white;
+  background: linear-gradient(135deg, white, rgb(252, 231, 243));
   border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .card-back {
@@ -220,17 +295,32 @@ function goToKeepsake() {
   transform: rotateY(0);
 }
 
-.heart-icon {
-  animation: pulse 2s infinite;
+.glowing-heart {
+  font-size: 4rem;
+  animation: glow 2s infinite;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+/* Navigation Button */
+.navigation-button {
+  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119));
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
 }
 
-/* Screen reader only class */
+.navigation-button:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+}
+
+.navigation-button:active {
+  transform: scale(0.98);
+}
+
+/* Screen reader only */
 .sr-only {
   position: absolute;
   width: 1px;
