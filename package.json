@@ -1,14 +1,10 @@
 {
   "name": "valentine-gift",
-  "version": "1.0.0",
-  "description": "Valentine's Gift Application",
+  "private": true,
+  "workspaces": ["frontend", "server"],
   "scripts": {
-    "install:all": "npm install && cd frontend && npm install && cd ../server && npm install",
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:server\"",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:server": "cd server && npm run dev",
-    "build": "cd frontend && npm run build",
-    "preview": "cd frontend && npm run preview"
+    "build": "npm install && npm run build --workspace=frontend && npm run build --workspace=server",
+    "dev": "concurrently \"npm run dev --workspace=frontend\" \"npm run start --workspace=server\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

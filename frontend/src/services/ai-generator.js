@@ -44,8 +44,9 @@ const AI_API = {
    * @returns {Promise<Object>} Generated content
    */
   async generate(input) {
+    const API_URL = import.meta.env.VITE_API_URL || '/api';
     try {
-      const response = await fetch(`${API_BASE_URL}/api/generate`, {
+      const response = await fetch(`${API_URL}/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

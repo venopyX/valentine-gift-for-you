@@ -1,14 +1,12 @@
 // Simple Express server to proxy AI requests
-import express from 'express';
-import cors from 'cors';
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+const express = require('express');
+const cors = require('cors');
+const fetch = require('node-fetch');
+const dotenv = require('dotenv');
+const path = require('path');
 
 // Load environment variables from the root .env file
-const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: join(__dirname, '..', '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const app = express();
 
@@ -123,7 +121,13 @@ IMPORTANT:
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`API server running on port ${PORT}`);
-});
+// Export the Express app for Vercel serverless function
+if (process.env.NODE_ENV === 'production') {
+  module.exports = app;
+} else {
+  // Start the server only in development
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
